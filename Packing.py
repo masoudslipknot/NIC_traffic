@@ -7,6 +7,8 @@ class unpack:
             self.data = None
 
         def ip_header(self, data):
+            #The reason we are using ! in our pattern is receiver always receive data in reverse order
+            #In this function we get every possible information we can have from IP header
             storeobj = struct.unpack("!BBHHHBBH4s4s", data)
             _version = storeobj[0]
             _tos = storeobj[1]
@@ -29,9 +31,11 @@ class unpack:
                     "Header CheckSum": _header_checksum,
                     "Source Address": _source_address,
                     "Destination Address": _destination_address}
+            #The result is a struct with every information and value
             return data
 
         def tcp_header(self, data):
+            # In this function we get every possible information we can have from TCP header
             storeobj = struct.unpack('!HHLLBBHHH', data)
             _source_port = storeobj[0]
             _destination_port = storeobj[1]
@@ -55,6 +59,7 @@ class unpack:
             return data
 
         def eth_header(self, data):
+            # In this function we get every possible information we can have from Ethernet header
             storeobj = data
             storeobj = struct.unpack("!6s6sH", storeobj)
             destination_mac = binascii.hexlify(storeobj[0])
