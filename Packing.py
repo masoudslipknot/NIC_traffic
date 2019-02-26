@@ -2,70 +2,35 @@ import struct
 import socket
 import binascii
 
-class unpack:
-        def __cinit__(self):
-            self.data = None
+def get_mac_addr(bytes_addr):
+    # print(bytes_addr)
+    bytes_str = map("{:02x}".format, bytes_addr)
+    return ':'.join(bytes_str).upper()
 
-        def ip_header(self, data):
-            #The reason we are using ! in our pattern is receiver always receive data in reverse order
-            #In this function we get every possible information we can have from IP header
-            storeobj = struct.unpack("!BBHHHBBH4s4s", data)
-            _version = storeobj[0]
-            _tos = storeobj[1]
-            _total_length = storeobj[2]
-            _identification = storeobj[3]
-            _fragment_Offset = storeobj[4]
-            _ttl = storeobj[5]
-            _protocol = storeobj[6]
-            _header_checksum = storeobj[7]
-            _source_address = socket.inet_ntoa(storeobj[8])
-            _destination_address = socket.inet_ntoa(storeobj[9])
 
-            data = {'Version': _version,
-                    "Tos": _tos,
-                    "Total Length": _total_length,
-                    "Identification": _identification,
-                    "Fragment": _fragment_Offset,
-                    "TTL": _ttl,
-                    "Protocol": _protocol,
-                    "Header CheckSum": _header_checksum,
-                    "Source Address": _source_address,
-                    "Destination Address": _destination_address}
-            #The result is a struct with every information and value
-            return data
+def get_ipv4(addr):
+    return '.'.join(map(str, addr))
 
-        def tcp_header(self, data):
-            # In this function we get every possible information we can have from TCP header
-            storeobj = struct.unpack('!HHLLBBHHH', data)
-            _source_port = storeobj[0]
-            _destination_port = storeobj[1]
-            _sequence_number = storeobj[2]
-            _acknowledge_number = storeobj[3]
-            _offset_reserved = storeobj[4]
-            _tcp_flag = storeobj[5]
-            _window = storeobj[6]
-            _checksum = storeobj[7]
-            _urgent_pointer = storeobj[8]
-            data = {"Source Port": _source_port,
-                    "Destination Port": _destination_port,
-                    "Sequence Number": _sequence_number,
-                    "Acknowledge Number": _acknowledge_number,
-                    "Offset & Reserved": _offset_reserved,
-                    "Tcp Flag": _tcp_flag,
-                    "Window": _window,
-                    "CheckSum": _checksum,
-                    "Urgent Pointer": _urgent_pointer
-                    }
-            return data
+def parse_frame(frame):
+    eth_len = 14
+    eth_header = frame[:eth_len]
+    eth_data = frame[eth_len:]
+    dest_mac, src_mac, proto_field1, proto_field2 = struct.unpack('!6s6scc', eth_header)
+    dest_mac = get_mac_addr(dest_mac)
+    src_mac = get_mac_addr(src_mac)
 
-        def eth_header(self, data):
-            # In this function we get every possible information we can have from Ethernet header
-            storeobj = data
-            storeobj = struct.unpack("!6s6sH", storeobj)
-            destination_mac = binascii.hexlify(storeobj[0])
-            source_mac = binascii.hexlify(storeobj[1])
-            eth_protocol = storeobj[2]
-            data = {"Destination Mac": destination_mac,
-                    "Source Mac": source_mac,
-                    "Protocol": eth_protocol}
-            return data
+    # proto is of the form b'\x08\x00'
+    # print(proto_field1+proto_field2)
+    proto1 = ''.join(map(str, proto_field1))
+    proto2 = ''.join(map(str, proto_field2))
+    proto = proto1 + proto2
+    # print(proto)
+    if proto == '80':
+        ip_proto = 'IPv4'
+    elif proto == '86':
+        ip_proto = 'ARP'
+    elif proto == '86DD':
+        ip_proto = 'IPv6'
+    else:
+        ip_proto = proto
+    return eth_data, ip_proto
