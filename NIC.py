@@ -4,21 +4,21 @@ import struct
 import socket
 import requests
 import Packing
+import csv
 
 
 
 
 
 
-def parse_UDP(data):
+def UDP_packets(data):
+    # Here udp packets are parced.
     src_port, dest_port, packet_length = struct.unpack('!HHH', data[:6])
-    print('---------UDP Packet---------')
-    print("Source_Port:", src_port, "\tDestination_Port:", dest_port,
-          "\nPacket_Length:", packet_length)
     return data[8:],src_port, dest_port
 
 
-def parse_TCP(data):
+def TCP_packets(data):
+    # Here tcp packets are parced.
     src_port, dest_port, seq, ack, offset_flags = struct.unpack('!HHLLH', data[:14])
 
     # Extract first 4 bits and multiply by 4 to get the header length.
@@ -32,20 +32,18 @@ def parse_TCP(data):
     flag_syn = (offset_flags & 2) >> 1
     flag_fin = offset_flags & 1
 
-    print('---------TCP Packet---------')
-    print("Source_Port:", src_port, "\tDestination_Port:", dest_port,
-          "\nHeader_Length:", tcp_header_length)
-
-
     return data[tcp_header_length:],src_port, dest_port
 
 
-def parse_transport_packet(data, protocol):
+def Packets(data, protocol):
+    # classifiying different protocols
     application_packet = None
+    src_port=0
+    dest_port=0
     if protocol == 'TCP':
-        application_packet,src_port, dest_port = parse_TCP(data)
+        application_packet,src_port, dest_port = TCP_packets(data)
     elif protocol == 'UDP':
-        application_packet,src_port, dest_port = parse_UDP(data)
+        application_packet,src_port, dest_port = UDP_packets(data)
 
     return application_packet,protocol,src_port, dest_port
 
@@ -58,7 +56,7 @@ def main():
     conn = socket.socket(socket.AF_PACKET, socket.SOCK_RAW, socket.ntohs(3))
 
     while True:
-      with open("results.csv", 'w') as csvfile:
+      with open("results.csv", 'a') as csvfile:
         # Receive the ethernet frame
         payload, addr = conn.recvfrom(65535)
         packet, ip_protocol = Packing.parse_frame(payload)
@@ -87,10 +85,19 @@ def main():
                 transport_proto = 'Unknown Protocol Field = ' + str(proto)
 
 
-            print("Source_IP:", src_ip, "\tDestination_IP:", dest_ip,
-                  "\nTTL:", ttl, 'hops\t', '\tTransport_Protocol:', transport_proto)
 
-            application_packet = parse_transport_packet(packet[ip_header_length:], transport_proto)
+
+            application_packet,protocol,src_port, dest_port = Packets(packet[ip_header_length:], transport_proto)
+
+            #In this part of code, we write on the CSV file
+            writer = csv.writer(csvfile)
+            finalstr = str(src_ip)+ ","+ str(dest_ip)+","+str(src_port)+","+str(dest_port)+","+protocol
+
+            writer.writerow(finalstr)
+
+
+            csvfile.close()
+
 
 
 main()

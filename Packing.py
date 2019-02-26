@@ -3,15 +3,17 @@ import socket
 import binascii
 
 def get_mac_addr(bytes_addr):
-    # print(bytes_addr)
+    # it is for printing the mac address
     bytes_str = map("{:02x}".format, bytes_addr)
     return ':'.join(bytes_str).upper()
 
 
 def get_ipv4(addr):
+    # It is defined for printing the ip address
     return '.'.join(map(str, addr))
 
 def parse_frame(frame):
+    #This method is used for parsing the ethernet
     eth_len = 14
     eth_header = frame[:eth_len]
     eth_data = frame[eth_len:]
