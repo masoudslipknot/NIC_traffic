@@ -5,6 +5,7 @@ import socket
 import requests
 import Packing
 import csv
+import time
 
 
 
@@ -32,7 +33,7 @@ def TCP_packets(data):
     flag_syn = (offset_flags & 2) >> 1
     flag_fin = offset_flags & 1
 
-    return data[tcp_header_length:],src_port, dest_port
+    return data[tcp_header_length:],src_port, dest_port,flag_ack
 
 
 def Packets(data, protocol):
@@ -40,12 +41,13 @@ def Packets(data, protocol):
     application_packet = None
     src_port=0
     dest_port=0
+    flg_ack=0
     if protocol == 'TCP':
-        application_packet,src_port, dest_port = TCP_packets(data)
+        application_packet,src_port, dest_port, flg_ack = TCP_packets(data)
     elif protocol == 'UDP':
         application_packet,src_port, dest_port = UDP_packets(data)
 
-    return application_packet,protocol,src_port, dest_port
+    return application_packet,protocol,src_port, dest_port,flg_ack
 
 
 
@@ -87,13 +89,27 @@ def main():
 
 
 
-            application_packet,protocol,src_port, dest_port = Packets(packet[ip_header_length:], transport_proto)
+            application_packet,protocol,src_port, dest_port,flg_ack = Packets(packet[ip_header_length:], transport_proto)
+            Duration = 0
+            Tcp_flow = []
+            if protocol=='TCP':
+                start_time = time.time()
+                if flg_ack!=1:
+                    Tcp_flow.append(application_packet)
+                elif flg_ack==1:
+                  end = time.time()
+                  Duration = end - start_time
 
             #In this part of code, we write on the CSV file
             writer = csv.writer(csvfile)
-            finalstr = str(src_ip)+ ","+ str(dest_ip)+","+str(src_port)+","+str(dest_port)+","+protocol
+            if Duration!=0 and protocol=='TCP':
+             finalstr = str(src_ip)+ ","+ str(dest_ip)+","+str(src_port)+","+str(dest_port)+","+protocol+str(Duration)
+             writer.writerow(finalstr)
+            elif protocol=='UDP':
+                finalstr = str(src_ip) + "," + str(dest_ip) + "," + str(src_port) + "," + str( dest_port) + "," + protocol
+                writer.writerow(finalstr)
 
-            writer.writerow(finalstr)
+
 
 
             csvfile.close()
