@@ -14,8 +14,23 @@ An example of formats: </br>
 ` storeobj = struct.unpack("!BBHHHBBH4s4s", data) ` </br>
 
 Here the ! means that receiver always receive data in reverse order. H is for Unsigned Short data types and number is for the times to use.</br>
+
+In these line of codes we determine which kind of ip packets we have: </br>
+
+`if proto == '80': ` </br>
+      `  ip_proto = 'IPv4'` </br>
+   ` elif proto == '86': `  </br>
+       ` ip_proto = 'ARP' `  </br>
+  `  elif proto == '86DD': `  </br>
+      `  ip_proto = 'IPv6' ` </br>
+  `  else: </br>
+        ip_proto = proto </br>
+        `
+
 We have a number when we parce it we can figure out which kind of packets we have. If it is 6 then its TCP, or its 17 we have UDP.
 Then we extract the sourceip and destination Ip. Source port and destination port are selected when it is define we have TCP or UDP.</br>
+
+As I found out on internet,  traffic flow, packet flow or network flow is a sequence of packets from a source computer to a destination, which may be another host, a multicast group, or a broadcast domain. We need to group these packets and calculate the featuers which are demanded.</br>
 
 After that, We will write all the information that we have in to the CSV_file.
 
