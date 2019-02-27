@@ -2,6 +2,11 @@
 # NIC_traffic
 <h2> Project Description:</h2>
 In this project, I am planning to capture packets from a machine. Then capture packets will be parsed in order to acquire the proper results. We only process the *TCP*  and *UDP*  packets and others such as ICMP packets are labeled **Unknown**  </br>
+<h3> Technologies which are used: </h3>
+1- Python 3.5 </br>
+2- No library(for further update I will use scapy) </br>
+3- Sockets </br>
+
 <h3> How the process is done? </h3>
 It is possible to use scapy for the whole project but, first, everything is coded here and we will pay attention to scapy after finishing our own packet sniffer.</br>
 Since we are accessing the packets, it is needed to run the code with Sudo in order to receive the permission.</br>
