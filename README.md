@@ -1,7 +1,7 @@
 
 # NIC_traffic
 <h2> Project Description:</h2>
-In this project, I am planning to capture packets from a machine. Then capture packets will be parsed in order to acquire the proper results.</br>
+In this project, I am planning to capture packets from a machine. Then capture packets will be parsed in order to acquire the proper results. We only process the *TCP*  and *UDP*  packets and others such as ICMP packets are labeled **Unknown**  </br>
 <h3> How the process is done? </h3>
 It is possible to use scapy for the whole project but, first, everything is coded here and we will pay attention to scapy after finishing our own packet sniffer.</br>
 Since we are accessing the packets, it is needed to run the code with Sudo in order to receive the permission.</br>
@@ -31,6 +31,7 @@ In these line of codes, we determine which kind of IP packets we have: </br>
 We have a number when we parse it we can figure out which kind of packets we have. If it is 6 then its TCP, or its 17 we have UDP.
 Then we extract the source and destination Ip. Source port and destination port are selected when it is define we have TCP or UDP.</br>
 
+For every packet that we parce, the demanded information will be stored in dictionary for making the flow.
 As I found out on internet,  traffic flow, packet flow or network flow is a sequence of packets from a source computer to a destination, which may be another host, a multicast group, or a broadcast domain. We need to group these packets and calculate the features which are demanded.</br>
 To make the flow of packets, I check if the source IP and DestIP are the same or not. IF they are the same we store packets in lists and we calculate the duration of it and number bytes which it sends.</br>
 
