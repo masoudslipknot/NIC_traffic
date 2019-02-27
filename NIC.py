@@ -90,24 +90,42 @@ def main():
 
 
             application_packet,protocol,src_port, dest_port,flg_ack = Packets(packet[ip_header_length:], transport_proto)
-            Duration = 0
-            Tcp_flow = []
-            if protocol=='TCP':
-                start_time = time.time()
-                if flg_ack!=1:
-                    Tcp_flow.append(application_packet)
-                elif flg_ack==1:
-                  end = time.time()
-                  Duration = end - start_time
+            pkg ={
+		     "src_port" : src_port,
+		     "dest_port" : dest_port,
+		   "protocol" : protocol,
+            "src_ip":src_ip,
+                "dest_ip":dest_ip
+	               }
+            Alpkg = []
+            Alpkg.append(pkg)
+            count = 0
+            d = []
+            for i in range(0,len(Alpkg)):
+                count = count + 1
+                if src_ip == Alpkg[i]["src_ip"] and dest_ip == Alpkg[i]["dest_ip"] and protocol == Alpkg[i]["protocol"]:
+                   res = len(d)
+                   res = res +1
+                   print(res)
+                   d.append("next item"+str(res))
 
             #In this part of code, we write on the CSV file
+
             writer = csv.writer(csvfile)
-            if Duration!=0 and protocol=='TCP':
-             finalstr = str(src_ip)+ ","+ str(dest_ip)+","+str(src_port)+","+str(dest_port)+","+protocol+str(Duration)
+            for i in range(0,len(Alpkg)):
+             src_port = Alpkg[i]["src_port"]
+             dest_port = Alpkg[i]["dest_port"]
+             protocol = Alpkg[i]["protocol"]
+             src_ip = Alpkg[i]["src_ip"]
+             dest_ip = Alpkg[i]["dest_ip"]
+             Duration =  len(d)
+             if protocol=='TCP':
+              size = Duration * 20
+             elif protocol=='UDP':
+                 size = Duration * 8
+             finalstr = str(src_ip)+ ","+ str(dest_ip)+","+str(src_port)+","+str(dest_port)+","+protocol+","+str(Duration) +","+ str(size)
              writer.writerow(finalstr)
-            elif protocol=='UDP':
-                finalstr = str(src_ip) + "," + str(dest_ip) + "," + str(src_port) + "," + str( dest_port) + "," + protocol
-                writer.writerow(finalstr)
+
 
 
 
